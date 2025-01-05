@@ -82,6 +82,21 @@ post_training:
   - roc_curve
 
 ```
+---
+
+## Using the -e or --epochs Parameter
+
+The -e (or --epochs) parameter allows you to specify the number of training epochs for a particular run. 
+
+Usage:
+
+mdln train -e <number_of_epochs>
+
+Example:
+
+mdln train -e 100
+
+Your config for this run will reflect this change automatically.
 
 ---
 
