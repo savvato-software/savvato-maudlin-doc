@@ -9,6 +9,7 @@ Welcome to the Maudlin Documentation repository! This documentation provides com
 - [Configuration](https://github.com/savvato-software/savvato-maudlin-doc/blob/main/config.md) - Information on configuring Maudlin for various use cases.
 - [Featurizers](https://github.com/savvato-software/savvato-maudlin-doc/blob/main/featurizers.md) - Documentation on feature engineering functions used in Maudlin.
 - [Training](https://github.com/savvato-software/savvato-maudlin-doc/blob/main/train.md) - Instructions on training models within the Maudlin framework.
+- [Scenarios](https://github.com/savvato-software/savvato-maurdlin-doc/blob/main/scenarios.md) - Batch together related changes and compare the results.
 - [Prediction](https://github.com/savvato-software/savvato-maudlin-doc/blob/main/predict.md) - Guidelines for making predictions using trained models.
 - [Customization](https://github.com/savvato-software/savvato-maudlin-doc/blob/main/customization.md) - Details on customizing Maudlin to fit specific needs.
 - [History](https://github.com/savvato-software/savvato-maudlin-doc/blob/main/history.md) - Information on tracking and managing experiment history.
