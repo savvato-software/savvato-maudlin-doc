@@ -48,6 +48,12 @@ Run an optimization using the last best trials:
 mdln optimize --trials 20 --use-last-best-trials
 ```
 
+Apply one of the best trials from the last run to the unit config, to be base the next training session:
+
+```bash
+mdln apply-opt <index>
+```
+
 ---
 
 ## Workflow
@@ -198,5 +204,4 @@ Use `use_last_best_trials` to constrain trials to the top configurations from a 
 ## References
 
 - [Optuna Documentation](https://optuna.org)
-
 
