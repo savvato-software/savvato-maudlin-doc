@@ -57,6 +57,25 @@ For each scenario:
 - A full training run is performed based on the edited configuration.
 - Normal outputs, such as logs, metrics, and visualizations, are generated.
 
+## Data Structure
+
+A file called `batch_config_changes.txt` stores each scenario as a JSON object with the following structure:
+
+```json
+{
+    "comment": "Brief description of the configuration changes.",
+    "sed_commands": [
+        "sed-command-1",
+        "sed-command-2"
+    ],
+    "optimize": true
+}
+```
+
+- **`comment`**: Describes the changes made.
+- **`sed_commands`**: Text-based search-and-replace instructions to modify the configuration.
+- **`optimize`**: Whether to optimize the configuration before training (`true` or `false`).
+
 ## Optional: Hyperparameter Optimization
 
 When creating a scenario, you can enable hyperparameter optimization. This step determines an ideal set of hyperparameters for the scenario, ensuring better training performance. These fields can also be edited later if needed.
@@ -68,4 +87,3 @@ When creating a scenario, you can enable hyperparameter optimization. This step 
 - Allows for side-by-side comparison of results from multiple variations.
 
 By leveraging scenarios, Maudlin provides a powerful mechanism for refining your models and discovering the best-performing configurations for your specific use case.
-
