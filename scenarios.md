@@ -14,14 +14,23 @@ In the Bank Marketing case study, the `duration` field is highly predictive. To 
    - Alternatively, edit the `run_metadata.json` file in the training directory (e.g., `~/src/_data/maudlin/trainings/bank-csv2`) to set the current run ID to your chosen base run ID.
 
 2. **Build a Training Scenario**
+   Run the following command to open the unit configuration file in an editor:
+   ```bash
+   mdln build-training-scenario
+   ```
 
-   - Run the following command to initiate the scenario creation process:
-     ```bash
-     mdln build-training-scenario
-     ```
-   - This command opens a `VI` editor with the most recent unit configuration file.
+   - Modify the configuration in the editor.
+   - Upon exiting, the system prompts you to:
+     - Provide a **comment** describing the changes.
+     - Decide whether to **optimize** before training with the modified configuration.
+   - The changes are saved in `batch_config_changes.txt` under the unit's training directory.
 
 3. **Edit the Configuration**
+   To edit a scenario that hasn't been processed yet:
+   ```bash
+   mdln edit-training-scenario
+   ```
+   This lists unprocessed scenarios, allowing you to select one, edit its changes, and update the comment or optimization flag.
 
    - In the editor, make changes to reflect what you want to test in your scenario. For example, you could:
      - Modify hyperparameters.
@@ -50,6 +59,20 @@ In the Bank Marketing case study, the `duration` field is highly predictive. To 
   The selected scenario's configuration will be merged with the current config, allowing you to make additional changes.
 
 ## Running the Scenarios
+  ```bash
+  mdln build-training-scenario
+  mdln train
+  ```
+
+`build-training-scenario` creates a file, `batch_config_changes.txt`. When `mdln train` is run, if `batch_config_changes.txt` exists, the code processes each scenario in sequence:
+1. **Applies Configuration Changes**:
+   - Each scenario's `sed_commands` are applied to the unit configuration file.
+2. **Optimization**:
+   - If the `optimize` flag is set, an optimization which narrows down the best hyperparameters for your scenario is run.
+3. **Executes Training**:
+   - Trains the model with the updated configuration.
+4. **Saves Metadata**:
+   - Stores the scenario's metadata, including the comment and changes applied, in the training run directory.
 
 For each scenario:
 
