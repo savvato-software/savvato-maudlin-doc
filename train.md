@@ -69,66 +69,7 @@ mdln train [options]
 
 ### Overview
 
-The **batch scenario workflow** allows you to define, modify, and process multiple training scenarios in sequence. This is achieved by using the `batch_config_changes.txt` file, which tracks configuration changes for each scenario.
-
-### How to Create Scenarios
-
-1. **Build a Training Scenario**:
-   Run the following command to open the unit configuration file in an editor:
-   ```bash
-   mdln build-training-scenario
-   ```
-
-   - Modify the configuration in the editor.
-   - Upon exiting, the system prompts you to:
-     - Provide a **comment** describing the changes.
-     - Decide whether to **optimize** before training with the modified configuration.
-   - The changes are saved in `batch_config_changes.txt` under the unit's training directory.
-
-2. **Edit Existing Scenarios**:
-   To edit a scenario that hasn't been processed yet:
-   ```bash
-   mdln edit-training-scenario
-   ```
-   This lists unprocessed scenarios, allowing you to select one, edit its changes, and update the comment or optimization flag.
-
-3. **List All Scenarios**:
-   Use the following command to view all scenarios:
-   ```bash
-   mdln list-training-scenarios
-   ```
-
-   This command displays processed and unprocessed scenarios for the active unit.
-
-### Structure of `batch_config_changes.txt`
-
-Each scenario in the file is represented as a JSON object with the following structure:
-```json
-{
-    "comment": "Brief description of the configuration changes.",
-    "sed_commands": [
-        "sed-command-1",
-        "sed-command-2"
-    ],
-    "optimize": true
-}
-```
-
-- **`comment`**: Describes the changes made.
-- **`sed_commands`**: Text-based search-and-replace instructions to modify the configuration.
-- **`optimize`**: Whether to optimize the configuration before training (`true` or `false`).
-
-### Processing Scenarios with `mdln train`
-
-If `batch_config_changes.txt` exists, `mdln train` processes scenarios in sequence:
-1. **Applies Configuration Changes**:
-   - Each scenario's `sed_commands` are applied to the configuration file.
-2. **Optimization**:
-   - If the `optimize` flag is set, `run_optimization` and `apply_optimization` are executed.
-3. **Executes Training**:
-   - Trains the model with the updated configuration.
-4. **Saves Metadata**:
-   - Stores the scenario's metadata, including the comment and changes applied, in the training run directory.
+The **batch scenario workflow** allows you to define, modify, and process multiple training scenarios in sequence. See [Scenarios](./scenarios.md) for details. 
 
 ---
 
