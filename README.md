@@ -8,7 +8,7 @@ Welcome to the Maudlin Documentation repository! This documentation provides com
 - [Workflow](https://github.com/savvato-software/savvato-maudlin-doc/blob/main/workflow.md) - An overview of Maudlin's workflow, detailing the processes involved.
 - [Configuration](https://github.com/savvato-software/savvato-maudlin-doc/blob/main/config.md) - Information on configuring Maudlin for various use cases.
 - [Featurizers](https://github.com/savvato-software/savvato-maudlin-doc/blob/main/featurizers.md) - Documentation on feature engineering functions used in Maudlin.
-- [Optimization](https://github.com/savvato-software/savvato-maudlin-doc/blob/main/optimize.md) - Use Optuna to optimize the hyperparameters for your model.
+- [Optimization](https://github.com/savvato-software/savvato-maudlin-doc/blob/main/optimize.md) - Find the optimal hyperparameters for your model.
 - [Training](https://github.com/savvato-software/savvato-maudlin-doc/blob/main/train.md) - Instructions on training models within the Maudlin framework.
 - [Scenarios](https://github.com/savvato-software/savvato-maurdlin-doc/blob/main/scenarios.md) - Batch together related changes and compare the results.
 - [Prediction](https://github.com/savvato-software/savvato-maudlin-doc/blob/main/predict.md) - Guidelines for making predictions using trained models.
