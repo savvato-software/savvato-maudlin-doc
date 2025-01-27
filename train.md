@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `mdln train` command in Maudlin is used to train a neural network model using the specified configuration and dataset. It handles the full training pipeline, including feature engineering, model creation, and evaluation.
+The `mdln train` command in Maudlin is used to train a neural network model using the specified configuration and dataset. It takes your input data, engineers features according to your configuration, creates a model based on your configuration, and trains it. It runs a certain number of epochs, and than outputs useful charts and data files in a run-specific directory. 
 
 ---
 
