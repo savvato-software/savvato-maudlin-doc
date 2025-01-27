@@ -2,176 +2,213 @@
 
 ## Overview
 
-The `mdln train` command in Maudlin is used to train a neural network model using the specified configuration and dataset. It takes your input data, engineers features according to your configuration, creates a model based on your configuration, and trains it. It runs a certain number of epochs, and than outputs useful charts and data files in a run-specific directory. 
+The `mdln train` command is a central feature in Maudlin, designed to streamline the training of neural network models. By leveraging a unit-specific YAML configuration, it orchestrates:
+
+1. **Data preprocessing and feature engineering**: Defined in the configuration.
+2. **Model training**: Executes training using the specified architecture and parameters.
+3. **Result generation**: Produces visualizations, logs, and outputs in a unique, run-specific directory.
+
+This command ensures reproducibility, flexibility, and ease of experimentation through structured workflows and granular configuration options.
 
 ---
 
 ## Command Syntax
 
 ```bash
-mdln train
+mdln train [options]
 ```
 
-### Description
+### Options
 
-This command:
-
-1. Loads the configuration specified in the active Maudlin unit.
-2. Processes the input data as defined in the YAML configuration.
-3. Constructs and exercises the neural network model to get predictions
-4. Generates outputs, logs, and visualizations in the results directory.
-
----
-
-## Prerequisites
-
-- Ensure that a Maudlin unit has been created using:
-  ```bash
-  mdln new <unit-name> --training_csv_path=./path/to/train.csv --prediction_csv_path=./path/to/predict.csv
-  ```
-- Verify the configuration file (e.g., `UNIT-NAME.config.yaml`) contains at least initial, if not time-tested settings for:
-  - Data preprocessing steps.
-  - Model architecture.
-  - Training parameters.
+| Option                  | Description                                                              |
+|-------------------------|--------------------------------------------------------------------------|
+| `-e`, `--epochs`        | Number of epochs for this training run (overrides YAML setting).         |
+| `-r`, `--run-id`        | Specify a training run ID for incremental training or debugging.         |
+| `-m`, `--use-existing-model` | Use a pre-trained model from a previous run instead of initializing a new one. |
 
 ---
 
-## Configuration Settings
+## Workflow and Functionality
 
-The `mdln train` command uses the configuration YAML file to define training parameters.
+### Step-by-Step Execution
 
-### Example Configuration
+1. **Unit-Specific Configuration**:  
+   - The active unit's configuration (`UNIT-NAME.config.yaml`) defines data paths, model settings, training parameters, and feature engineering.
+   - You must activate the desired unit using:
+     ```bash
+     mdln use <unit-name>
+     ```
 
-```yaml
-model_architecture:
-  - layer_type: LSTM
-    units: 64
-    return_sequences: True
-  - layer_type: Dense
-    units: 1
-    activation: 'linear'
-optimizer: 'adam'
-loss_function: 'mse'
-metrics: ['mae', 'accuracy']
-epochs: 50
-batch_size: 32
-pre_training:
-  diagrams:
-  - oversampling
-  - correlation_matrix
-  - boxplot
-  oversampling:
-    calculate_long_running_diagrams: false
-    console_logging: true
-    enabled: true
-    k_neighbors: 3
-    method: adasyn
-    n_jobs: -1
-    random_state: 42
-    run_pca_before: false
-    sampling_strategy: 0.8
-training:
-  adaptive_learning_rate:
-    patience: 5
-    factor: 0.85
-    min-lr: 1e-6
-post_training:
-  diagrams:
-  - confusion_matrix
-  - precision_recall_curve
-  - roc_curve
+2. **Directory Initialization**:  
+   - A new directory is created for the training run under:
+     ```
+     MAUDLIN_DATA_DIR/trainings/<unit-name>/run_<run-id>/
+     ```
+   - The YAML configuration is copied into this directory and updated dynamically with:
+     - `run_id` and `parent_run_id`.
+     - Any specified runtime parameters, such as `--epochs`.
 
+3. **Preprocessing and Data Preparation**:  
+   - Input and target functions are executed to preprocess data and prepare labels.
+   - Feature engineering steps (e.g., normalization, SMOTE) are applied, if defined in the YAML file.
+
+4. **Model Training**:  
+   - The model is constructed as per the `model_architecture` section in the configuration.
+   - Training is executed with callbacks, including:
+     - **Adaptive Learning Rate**: Adjusts learning rates dynamically.
+     - **Metric Tracking**: Tracks the best metrics and saves corresponding model weights.
+     - **TensorBoard**: Logs training data for visualization.
+
+5. **Post-Training**:  
+   - Custom post-training functions process results and generate reports.
+   - Visualizations (e.g., confusion matrix, ROC curve) are saved in the run directory.
+
+---
+
+## Batch Scenario Workflow
+
+### Overview
+
+The **batch scenario workflow** allows you to define, modify, and process multiple training scenarios in sequence. This is achieved by using the `batch_config_changes.txt` file, which tracks configuration changes for each scenario.
+
+### How to Create Scenarios
+
+1. **Build a Training Scenario**:
+   Run the following command to open the unit configuration file in an editor:
+   ```bash
+   mdln build-training-scenario
+   ```
+
+   - Modify the configuration in the editor.
+   - Upon exiting, the system prompts you to:
+     - Provide a **comment** describing the changes.
+     - Decide whether to **optimize** before training with the modified configuration.
+   - The changes are saved in `batch_config_changes.txt` under the unit's training directory.
+
+2. **Edit Existing Scenarios**:
+   To edit a scenario that hasn't been processed yet:
+   ```bash
+   mdln edit-training-scenario
+   ```
+   This lists unprocessed scenarios, allowing you to select one, edit its changes, and update the comment or optimization flag.
+
+3. **List All Scenarios**:
+   Use the following command to view all scenarios:
+   ```bash
+   mdln list-training-scenarios
+   ```
+
+   This command displays processed and unprocessed scenarios for the active unit.
+
+### Structure of `batch_config_changes.txt`
+
+Each scenario in the file is represented as a JSON object with the following structure:
+```json
+{
+    "comment": "Brief description of the configuration changes.",
+    "sed_commands": [
+        "sed-command-1",
+        "sed-command-2"
+    ],
+    "optimize": true
+}
 ```
+
+- **`comment`**: Describes the changes made.
+- **`sed_commands`**: Text-based search-and-replace instructions to modify the configuration.
+- **`optimize`**: Whether to optimize the configuration before training (`true` or `false`).
+
+### Processing Scenarios with `mdln train`
+
+If `batch_config_changes.txt` exists, `mdln train` processes scenarios in sequence:
+1. **Applies Configuration Changes**:
+   - Each scenario's `sed_commands` are applied to the configuration file.
+2. **Optimization**:
+   - If the `optimize` flag is set, `run_optimization` and `apply_optimization` are executed.
+3. **Executes Training**:
+   - Trains the model with the updated configuration.
+4. **Saves Metadata**:
+   - Stores the scenario's metadata, including the comment and changes applied, in the training run directory.
+
 ---
 
-## Using the -e or --epochs Parameter
+## Key Features and Parameters
 
-The -e (or --epochs) parameter allows you to specify the number of training epochs for a particular run. 
+### **1. Epochs (`-e` or `--epochs`)**
+Overrides the default number of epochs specified in the YAML configuration for this specific run. This is reflected in the copied configuration for the run.
 
-Usage:
-
-mdln train -e <number_of_epochs>
-
-Example:
-
+**Example**:
+```bash
 mdln train -e 100
-
-Your config for this run will reflect this change automatically.
+```
 
 ---
 
-## Custom Functions
+### **2. Use Existing Model (`-m`)**
+If specified, uses the model from the previous training run (as recorded in the unit metadata) to continue training. This is useful for incremental learning or fine-tuning.
 
-You can influence the data being trained on, and implement custom handling of the results once the training is done, by using unit-specific workflow functions. In your unit, by default at `MAUDLIN_DATA_DIR/functions`, you have the following:
+**Example**:
+```bash
+mdln train -m
+```
 
-- `input_function`: Prepares and processes input data for training.
-- `target_function`: Defines target values and labels for supervised learning.
-- `pre_training_function`: Executes preprocessing steps before training starts, such as normalization or augmentation.
-- `post_training_function`: Processes outputs and generates reports after training.
-- `pre_prediction_function` (*): Prepares data before making predictions (not used during training).
-- `post_prediction_function` (*): Processes outputs after predictions are made (not used during training).
+---
 
-(*) Functions marked with an asterisk are specific to prediction workflows and are not invoked during training.
-
-These functions allow granular customization to align data preparation and post-processing with specific project needs.
+### **3. Batch Scenarios**
+By leveraging `mdln build-training-scenario` and `batch_config_changes.txt`, you can iterate through multiple configurations efficiently.
 
 ---
 
 ## Outputs
 
-Upon completion, `mdln train` generates the following outputs:
+Upon completion, `mdln train` generates the following outputs in the run-specific directory:
 
-1. Model files, weights, and architecture.
-2. Training logs including loss and accuracy metrics.
-3. Pre- and post-training visualizations:
-   - Confusion matrix
-   - Precision-recall curve
-   - ROC curve
-4. Feature importance analysis using SHAP.
-5. Diagnostic plots, if enabled.
+1. **Model Files**:
+   - Saved weights and architecture for the trained model.
+2. **Logs**:
+   - Loss and accuracy metrics, along with TensorBoard logs.
+3. **Visualizations**:
+   - Diagnostic plots and charts for performance analysis.
+4. **Metadata**:
+   - YAML file reflecting the runtime configuration.
+   - Metadata about the training run (e.g., run ID, parent run ID).
 
 ---
 
 ## Example Usage
 
 ```bash
+# Activate a unit
 mdln use bank_marketing_unit
+
+# Train with default settings
+mdln train
+
+# Train for 100 epochs
+mdln train -e 100
+
+# Continue training from a previous run
+mdln train -m
+
+# Process batch scenarios
 mdln train
 ```
-
-This example uses the `bank_marketing_unit` configuration and trains a model based on its settings.
-
----
-
-## Error Handling
-
-If errors occur, check:
-
-1. YAML configuration syntax.
-2. Paths to CSV files in the configuration.
-3. Compatibility of data columns with defined features.
-4. Logs generated in the output directory for debugging.
-
----
-
-## Additional Notes
-
-- Use `mdln list` to verify available units.
-- Activate a unit with `mdln use <unit-name>` before training.
-- Customize pre- and post-training steps by defining additional Python functions in the `functions/` directory.
 
 ---
 
 ## Related Commands
 
-- `mdln new` - Create a new Maudlin unit.
-- `mdln predict` - Perform predictions using a trained model.
-- `mdln list` - List all available units.
-- `mdln use` - Select a unit for training or prediction.
+- **`mdln new`**: Create a new unit.
+- **`mdln list`**: List available units.
+- **`mdln use`**: Activate a unit for training or prediction.
+- **`mdln predict`**: Perform predictions using a trained model.
+- **`mdln build-training-scenario`**: Create a new scenario with configuration changes.
+- **`mdln list-training-scenarios`**: List all unprocessed and processed scenarios.
+- **`mdln edit-training-scenario`**: Edit an unprocessed scenario.
 
 ---
 
 ## Conclusion
 
-The `mdln train` command simplifies the end-to-end training process in Maudlin, leveraging YAML configurations for flexible customization. It supports advanced features such as SMOTE, adaptive learning rates, and post-training visualizations for comprehensive model evaluation.
+The `mdln train` command is a versatile and robust tool for neural network training. Combined with the **batch scenario workflow**, it enables efficient experimentation, optimization, and model evaluation for complex projects.
 
